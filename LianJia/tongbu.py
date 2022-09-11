@@ -1,5 +1,3 @@
-#  同步爬取链家网信息，保存至csv文件
-
 import math
 import random
 import re
@@ -12,13 +10,17 @@ location_info = '''    1-->南京
     2-->上海
     3-->北京
     按ENTER确认：'''
+sector_info = '''区划请输入拼音（如西城请输入“xicheng”）
+    按ENTER确认：'''
+
 location_select = input(location_info)
+sector_select = input(sector_info)
 location_dic = {
     '1': 'nj',
     '2': 'sh',
     '3': 'bj'
 }
-city_url = f'https://{location_dic[location_select]}.lianjia.com/ershoufang/'
+city_url = f'https://{location_dic[location_select]}.lianjia.com/ershoufang/' + str(sector_select) +"/"
 down = input("请输入价格下限（万）：")
 up = input("请输入价格上限（万）：")
 
@@ -38,7 +40,7 @@ headers = {'user-agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/
 def get_num(inter):
     link = city_url + f'bp{inter[0]}ep{inter[1]}/'
     r = requests.get(link, headers=headers)
-    num = int(etree.HTML(r).xpath("//h2[@class='total fl']/span/text()")[0].strip())
+    num = int(etree.HTML(r.text).xpath("//h2[@class='total fl']/span/text()")[0].strip())
     pagenum[(inter[0], inter[1])] = num
     return num
 
@@ -94,40 +96,43 @@ for url in url_list:
         except:
             info_dict['链接'] = 'None'
         try:
-            detail = house.xpath('.//div[@class="houseInfo"]')[0].xpath('string(.)').replace(' ', '')
-            info_dict['小区'] = detail.split('|')[0]
+            info_dict['小区'] = house.xpath('.//div[@class="positionInfo"]')[0].xpath('string(.)').replace(' ', '')
         except:
             info_dict['小区'] = 'None'
         try:
-            info_dict['户型'] = detail.split('|')[1]
+            detail = house.xpath('.//div[@class="houseInfo"]')[0].xpath('string(.)').replace(' ', '')
         except:
             info_dict['户型'] = 'None'
         try:
-            info_dict['面积'] = detail.split('|')[2]
+            info_dict['户型'] = detail.split('|')[0]
+        except:
+            info_dict['户型'] = 'None'
+        try:
+            info_dict['面积'] = detail.split('|')[1]
         except:
             info_dict['面积'] = 'None'
         try:
-            info_dict['朝向'] = detail.split('|')[3]
+            info_dict['朝向'] = detail.split('|')[2]
         except:
             info_dict['朝向'] = 'None'
         try:
-            info_dict['装修'] = detail.split('|')[4]
+            info_dict['装修'] = detail.split('|')[3]
         except:
             info_dict['装修'] = 'None'
         try:
-            info_dict['楼层'] = ''.join(house.xpath('.//div[@class="positionInfo"]/text()')[0].strip().replace(' ', '').split('-')[0])
+            info_dict['楼层'] = detail.split('|')[4]
         except:
             info_dict['楼层'] = 'None'
         try:
-            info_dict['建造时间'] = ''.join(re.findall('\)(.*?)年', house.xpath('.//div[@class="positionInfo"]/text()')[0].strip()))
+            info_dict['建造时间'] = detail.split('|')[5]
         except:
             info_dict['建造时间'] = 'None'
         try:
-            info_dict['关注人数'] = ''.join(re.findall('[0-9]', house.xpath('.//div[@class="followInfo"]/text()')[0].strip().split('/')[0]))
+            info_dict['关注人数'] = house.xpath('.//div[@class="followInfo"]/text()')[0].split("/")[0]
         except:
             info_dict['关注人数'] = 'None' 
         try:
-            info_dict['发布时间'] = house.xpath('.//div[@class="followInfo"]/text()')[0].strip().split('/')[1].replace(' ', '')
+            info_dict['发布时间'] = house.xpath('.//div[@class="followInfo"]/text()')[0].split("/")[1]
         except:
             info_dict['发布时间'] = 'None'
         try:
