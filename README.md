@@ -1,4 +1,4 @@
-[## CrawlerProject
+## CrawlerProject
 
 * [1.1 链家网二手房源](https://github.com/LMFrank/CrawlerProject/tree/master/LianJia)
 * [1.2 Wikipedia](https://github.com/LMFrank/CrawlerProject/tree/master/Wikipedia)
@@ -16,10 +16,9 @@
 
 主要改动了同步爬取，加入了选择区划的功能，可以在某一区划内对价格进行筛选了。
 同时略微优化了源代码，适应了新版界面的样式。
+加入了地铁站和环数信息，代价是爬取速度降低了。
 
 同步爬取：[tongbu.py](https://github.com/LMFrank/CrawlerProject/blob/master/LianJia/tongbu.py)（requests+xpath)
-
-异步爬取：[yibu.py](https://github.com/LMFrank/CrawlerProject/blob/master/LianJia/yibu.py)（asyncio+aiohttp+xpath)
 
 有待改进：
 
@@ -27,6 +26,8 @@
 
 2、加入学区信息。
 
+（这两块用request暂时不太好爬，有空想想办法）
+
 3、其他想到再说。
 
-***](https://github.com/NeverOccurs/CrawlerProject/edit/master/README.md)
+***
