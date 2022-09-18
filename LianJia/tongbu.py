@@ -58,18 +58,6 @@ print("价格区间缩小完毕！", inter_list)
 print(f"一共有{totalnum}条房源信息")
 #  print(pagenum)
 
-url_list = []
-url_list_failed = []
-url_list_successed = []
-url_list_duplicated = []
-
-for i in inter_list:
-    totalpage = math.ceil(pagenum[i]/30)
-    for j in range(1, totalpage+1):
-        url = city_url + f'pg{j}bp{i[0]}ep{i[1]}/'
-        url_list.append(url)
-print("url列表获取完毕")
-
 info_list = []
 scrap_times = 0
 start = time.time()
@@ -94,40 +82,70 @@ for url in url_list:
         except:
             info_dict['链接'] = 'None'
         try:
-            detail = house.xpath('.//div[@class="houseInfo"]')[0].xpath('string(.)').replace(' ', '')
-            info_dict['小区'] = detail.split('|')[0]
+            rh = requests.get(info_dict['链接'], headers=headers, timeout=20)
+        except Exception as e:
+            print(url)
+            print(e)
+        html1 = etree.HTML(rh.text)
+        try:
+            info_dict['地铁'] = html1.xpath('.//div[@class="areaName"]/a/text()')[0]
+        except:
+            info_dict['地铁'] = 'None'
+        try:
+            info_dict['环数'] = html1.xpath('.//span[@class="info"]/text()')[1].strip()
+        except:
+            info_dict['环数'] = 'None'
+        try:
+            info_dict['房屋用途'] = html1.xpath('.//li[@class=""]/span/text()')[7]
+        except:
+            info_dict['房屋用途'] = 'None'
+        try:
+            info_dict['上次交易'] = html1.xpath('.//li[@class=""]/span/text()')[5]
+        except:
+            info_dict['上次交易'] = 'None'
+        try:
+            info_dict['挂牌时间'] = html1.xpath('.//li[@class=""]/span/text()')[1]
+        except:
+            info_dict['挂牌时间'] = 'None'
+            
+        try:
+            info_dict['小区'] = house.xpath('.//div[@class="positionInfo"]')[0].xpath('string(.)').replace(' ', '')
         except:
             info_dict['小区'] = 'None'
         try:
-            info_dict['户型'] = detail.split('|')[1]
+            detail = house.xpath('.//div[@class="houseInfo"]')[0].xpath('string(.)').replace(' ', '')
         except:
             info_dict['户型'] = 'None'
         try:
-            info_dict['面积'] = detail.split('|')[2]
+            info_dict['户型'] = detail.split('|')[0]
+        except:
+            info_dict['户型'] = 'None'
+        try:
+            info_dict['面积'] = detail.split('|')[1]
         except:
             info_dict['面积'] = 'None'
         try:
-            info_dict['朝向'] = detail.split('|')[3]
+            info_dict['朝向'] = detail.split('|')[2]
         except:
             info_dict['朝向'] = 'None'
         try:
-            info_dict['装修'] = detail.split('|')[4]
+            info_dict['装修'] = detail.split('|')[3]
         except:
             info_dict['装修'] = 'None'
         try:
-            info_dict['楼层'] = ''.join(house.xpath('.//div[@class="positionInfo"]/text()')[0].strip().replace(' ', '').split('-')[0])
+            info_dict['楼层'] = detail.split('|')[4]
         except:
             info_dict['楼层'] = 'None'
         try:
-            info_dict['建造时间'] = ''.join(re.findall('\)(.*?)年', house.xpath('.//div[@class="positionInfo"]/text()')[0].strip()))
+            info_dict['建造时间'] = detail.split('|')[5]
         except:
             info_dict['建造时间'] = 'None'
         try:
-            info_dict['关注人数'] = ''.join(re.findall('[0-9]', house.xpath('.//div[@class="followInfo"]/text()')[0].strip().split('/')[0]))
+            info_dict['关注人数'] = house.xpath('.//div[@class="followInfo"]/text()')[0].split("/")[0]
         except:
             info_dict['关注人数'] = 'None' 
         try:
-            info_dict['发布时间'] = house.xpath('.//div[@class="followInfo"]/text()')[0].strip().split('/')[1].replace(' ', '')
+            info_dict['发布时间'] = house.xpath('.//div[@class="followInfo"]/text()')[0].split("/")[1]
         except:
             info_dict['发布时间'] = 'None'
         try:
